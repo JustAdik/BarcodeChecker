@@ -1,268 +1,146 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-
-  <title>BarcodeChecker</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Barcode Scanner</title>
 
   <script src="https://unpkg.com/html5-qrcode"></script>
 
   <style>
-    * {
-      box-sizing: border-box;
-    }
-
     body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      min-height: 100vh;
-      background:
-        radial-gradient(circle at top left, #00ffd522, transparent 35%),
-        linear-gradient(135deg, #0f172a, #111827);
-      color: white;
-      padding: 18px;
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: linear-gradient(135deg, #1e1e2f, #2a2a40);
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
     }
 
     .container {
-      width: 100%;
-      max-width: 620px;
-      margin: 0 auto;
-      background: rgba(15, 23, 42, 0.95);
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 30px;
-      padding: 24px;
-      box-shadow: 0 25px 70px rgba(0,0,0,0.55);
+        background: #2f2f4f;
+        padding: 30px;
+        border-radius: 25px;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+        text-align: center;
+        width: 90%;
+        max-width: 500px;
     }
 
-    .header {
-      text-align: center;
-      margin-bottom: 22px;
-    }
-
-    .header h1 {
-      margin: 0;
-      font-size: 34px;
-      letter-spacing: 0.5px;
-    }
-
-    .header p {
-      margin: 8px 0 0;
-      color: #94a3b8;
-      font-size: 18px;
-    }
-
-    .mode-buttons {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-      margin-bottom: 20px;
-    }
-
-    button {
-      border: none;
-      border-radius: 20px;
-      padding: 18px;
-      font-size: 22px;
-      font-weight: 800;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-
-    #btnEntry {
-      background: #22c55e;
-      color: white;
-    }
-
-    #btnExit {
-      background: #334155;
-      color: #cbd5e1;
+    h2 {
+        font-size: 28px;
+        margin-bottom: 20px;
     }
 
     #reader {
-      width: 100%;
-      overflow: hidden;
-      border-radius: 24px;
-      background: #020617;
-      border: 2px solid rgba(34, 197, 94, 0.35);
-      margin-bottom: 20px;
+        width: 100%;
+        border-radius: 20px;
+        overflow: hidden;
+        margin-bottom: 20px;
     }
 
-    .card {
-      background: #1e293b;
-      border-radius: 22px;
-      padding: 18px;
-      margin-bottom: 14px;
-      border: 1px solid rgba(255,255,255,0.08);
+    .result-box {
+        background: #1e1e2f;
+        padding: 15px;
+        border-radius: 15px;
+        margin-bottom: 15px;
+        font-size: 20px;
     }
 
-    .label {
-      font-size: 16px;
-      color: #94a3b8;
-      margin-bottom: 8px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
+    .highlight {
+        color: #00ffcc;
+        font-weight: bold;
+        font-size: 26px;
+        margin-top: 10px;
     }
 
-    .value {
-      font-size: 28px;
-      font-weight: 800;
-      color: #e2e8f0;
-      word-break: break-word;
+    button {
+        background: #00ffcc;
+        border: none;
+        padding: 15px 20px;
+        border-radius: 15px;
+        cursor: pointer;
+        font-weight: bold;
+        font-size: 18px;
+        width: 100%;
+        transition: 0.3s;
     }
 
-    .status {
-      text-align: center;
-      background: #0f172a;
-      color: #cbd5e1;
-      border-radius: 18px;
-      padding: 15px;
-      font-size: 18px;
-      margin-bottom: 14px;
-    }
-
-    .reset {
-      width: 100%;
-      background: #38bdf8;
-      color: #082f49;
-    }
-
-    @media (max-width: 480px) {
-      .header h1 {
-        font-size: 28px;
-      }
-
-      button {
-        font-size: 19px;
-        padding: 16px;
-      }
-
-      .value {
-        font-size: 24px;
-      }
+    button:hover {
+        background: #00ccaa;
     }
   </style>
 </head>
 <body>
 
 <div class="container">
-
-  <div class="header">
-    <h1>BarcodeChecker</h1>
-    <p>Scan barcodes for entry and exit operations</p>
+  <h2>Barcode Scanner</h2>
+  <div style="margin-bottom:15px;">
+    <button onclick="setMode('giris')" id="btnGiris">Giriş (+)</button>
+    <button onclick="setMode('cikis')" id="btnCikis">Çıkış (-)</button>
   </div>
-
-  <div class="mode-buttons">
-    <button onclick="setMode('giris')" id="btnEntry">Entry +</button>
-    <button onclick="setMode('cikis')" id="btnExit">Exit -</button>
-  </div>
-
   <div id="reader"></div>
 
-  <div class="card">
-    <div class="label">Last Scanned Barcode</div>
-    <div class="value" id="result">—</div>
+  <div class="result-box">
+    Last scanned code:
+    <div class="highlight" id="result">—</div>
   </div>
 
-  <div class="card">
-    <div class="label">Selected Operation</div>
-    <div class="value" id="modeText">Entry</div>
-  </div>
-
-  <div class="status" id="status">Starting camera...</div>
-
-  <button class="reset" onclick="resetScan()">Reset</button>
-
+  <button onclick="resetScan()">Reset</button>
 </div>
 
 <script>
-  let lastCode = null;
+
   let mode = "giris";
-
-  const GOOGLE_SCRIPT_URL =
-    "https://script.google.com/macros/s/AKfycbzZp8KgXzv7jfJPeld8LhzFx58aIcFUC4iaG7BWBfdfZTq62cOZGangSO40cHowsBHh/exec";
-
-  function setMode(selected) {
-    mode = selected;
-    lastCode = null;
-
-    const btnEntry = document.getElementById("btnEntry");
-    const btnExit = document.getElementById("btnExit");
-    const modeText = document.getElementById("modeText");
-
-    if (mode === "giris") {
-      btnEntry.style.background = "#22c55e";
-      btnEntry.style.color = "white";
-
-      btnExit.style.background = "#334155";
-      btnExit.style.color = "#cbd5e1";
-
-      modeText.innerText = "Entry";
-    } else {
-      btnEntry.style.background = "#334155";
-      btnEntry.style.color = "#cbd5e1";
-
-      btnExit.style.background = "#ef4444";
-      btnExit.style.color = "white";
-
-      modeText.innerText = "Exit";
-    }
-  }
-
-  function setStatus(text) {
-    document.getElementById("status").innerText = text;
-  }
-
-  function onScanSuccess(decodedText) {
-    if (decodedText === lastCode) return;
-
-    lastCode = decodedText;
-    document.getElementById("result").innerText = decodedText;
-
-    setStatus("Sending barcode...");
-
-    fetch(GOOGLE_SCRIPT_URL, {
-      method: "POST",
-      mode: "no-cors",
-      headers: {
-        "Content-Type": "text/plain"
-      },
-      body: JSON.stringify({
-        barcode: decodedText,
-        mode: mode
-      })
-    })
-    .then(() => {
-      setStatus(
-        mode === "giris"
-          ? "Entry saved"
-          : "Exit saved"
-      );
-
-      setTimeout(() => {
-        lastCode = null;
-      }, 2000);
-    })
-    .catch(err => {
-      console.error(err);
-      setStatus("Send error");
-    });
-  }
-
-  function resetScan() {
-    lastCode = null;
-    document.getElementById("result").innerText = "—";
-    setStatus("Reset complete");
-  }
+  let lastCode = null;
 
   const scanner = new Html5QrcodeScanner("reader", {
-    fps: 10,
-    qrbox: { width: 320, height: 320 }
+      fps: 10,
+      qrbox: { width: 300, height: 300 }
   });
 
   scanner.render(onScanSuccess);
 
-  setStatus("Camera ready");
+function onScanSuccess(decodedText) {
+
+    if (decodedText === lastCode) return;
+    lastCode = decodedText;
+
+    document.getElementById("result").innerText = decodedText;
+
+    fetch("https://script.google.com/macros/s/AKfycbzZp8KgXzv7jfJPeld8LhzFx58aIcFUC4iaG7BWBfdfZTq62cOZGangSO40cHowsBHh/exec", {
+        method: "POST",
+        mode: "no-cors",
+        headers: {
+            "Content-Type": "text/plain"
+        },
+        body: JSON.stringify({
+            barcode: decodedText,
+            mode: mode
+        })
+    })
+    .then(() => console.log("Saved"))
+    .catch(err => console.error(err));
+}
+
+  function resetScan() {
+      lastCode = null;
+      document.getElementById("result").innerText = "—";
+  }
+
+
+
+function setMode(selected) {
+    mode = selected;
+
+    document.getElementById("btnGiris").style.background =
+        mode === "giris" ? "#00ffcc" : "#555";
+
+    document.getElementById("btnCikis").style.background =
+        mode === "cikis" ? "#ff4d4d" : "#555";
+}
 </script>
 
 </body>

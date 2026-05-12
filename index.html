@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Barcode Scanner</title>
+
+  <script src="https://unpkg.com/html5-qrcode"></script>
+
+  <style>
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: linear-gradient(135deg, #1e1e2f, #2a2a40);
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+
+    .container {
+        background: #2f2f4f;
+        padding: 30px;
+        border-radius: 25px;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+        text-align: center;
+        width: 90%;
+        max-width: 500px;
+    }
+
+    h2 {
+        font-size: 28px;
+        margin-bottom: 20px;
+    }
+
+    #reader {
+        width: 100%;
+        border-radius: 20px;
+        overflow: hidden;
+        margin-bottom: 20px;
+    }
+
+    .result-box {
+        background: #1e1e2f;
+        padding: 15px;
+        border-radius: 15px;
+        margin-bottom: 15px;
+        font-size: 20px;
+    }
+
+    .highlight {
+        color: #00ffcc;
+        font-weight: bold;
+        font-size: 26px;
+        margin-top: 10px;
+    }
+
+    button {
+        background: #00ffcc;
+        border: none;
+        padding: 15px 20px;
+        border-radius: 15px;
+        cursor: pointer;
+        font-weight: bold;
+        font-size: 18px;
+        width: 100%;
+        transition: 0.3s;
+    }
+
+    button:hover {
+        background: #00ccaa;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h2>Barcode Scanner</h2>
+  <div style="margin-bottom:15px;">
+    <button onclick="setMode('giris')" id="btnGiris">Giriş (+)</button>
+    <button onclick="setMode('cikis')" id="btnCikis">Çıkış (-)</button>
+  </div>
+  <div id="reader"></div>
+
+  <div class="result-box">
+    Last scanned code:
+    <div class="highlight" id="result">—</div>
+  </div>
+
+  <button onclick="resetScan()">Reset</button>
+</div>
+
+<script>
+
+  let lastCode = null;
+
+  const scanner = new Html5QrcodeScanner("reader", {
+      fps: 10,
+      qrbox: { width: 300, height: 300 }
+  });
+
+  scanner.render(onScanSuccess);
+
+  function onScanSuccess(decodedText) {
+
+      if (decodedText === lastCode) return;
+      lastCode = decodedText;
+
+      document.getElementById("result").innerText = decodedText;
+
+fetch("https://script.google.com/macros/s/https://script.google.com/macros/s/AKfycbzZp8KgXzv7jfJPeld8LhzFx58aIcFUC4iaG7BWBfdfZTq62cOZGangSO40cHowsBHh/exec", {
+  method: "POST",
+  mode: "no-cors",
+  headers: {
+    "Content-Type": "text/plain"
+  },
+  body: JSON.stringify({
+    barcode: decodedText,
+    mode: mode
+  })
+});
+      .then(res => res.text())
+      .then(data => console.log("Saved:", data))
+      .catch(err => console.error(err));
+  }
+
+  function resetScan() {
+      lastCode = null;
+      document.getElementById("result").innerText = "—";
+  }
+
+  let mode = "giris";
+
+function setMode(selected) {
+    mode = selected;
+
+    document.getElementById("btnGiris").style.background =
+        mode === "giris" ? "#00ffcc" : "#555";
+
+    document.getElementById("btnCikis").style.background =
+        mode === "cikis" ? "#ff4d4d" : "#555";
+}
+</script>
+
+</body>
+</html>

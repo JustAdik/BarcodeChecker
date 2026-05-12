@@ -93,6 +93,7 @@
 
 <script>
 
+  let mode = "giris";
   let lastCode = null;
 
   const scanner = new Html5QrcodeScanner("reader", {
@@ -102,35 +103,34 @@
 
   scanner.render(onScanSuccess);
 
-  function onScanSuccess(decodedText) {
+function onScanSuccess(decodedText) {
 
-      if (decodedText === lastCode) return;
-      lastCode = decodedText;
+    if (decodedText === lastCode) return;
+    lastCode = decodedText;
 
-      document.getElementById("result").innerText = decodedText;
+    document.getElementById("result").innerText = decodedText;
 
-fetch("https://script.google.com/macros/s/https://script.google.com/macros/s/AKfycbzZp8KgXzv7jfJPeld8LhzFx58aIcFUC4iaG7BWBfdfZTq62cOZGangSO40cHowsBHh/exec", {
-  method: "POST",
-  mode: "no-cors",
-  headers: {
-    "Content-Type": "text/plain"
-  },
-  body: JSON.stringify({
-    barcode: decodedText,
-    mode: mode
-  })
-});
-      .then(res => res.text())
-      .then(data => console.log("Saved:", data))
-      .catch(err => console.error(err));
-  }
+    fetch("https://script.google.com/macros/s/AKfycbzZp8KgXzv7jfJPeld8LhzFx58aIcFUC4iaG7BWBfdfZTq62cOZGangSO40cHowsBHh/exec", {
+        method: "POST",
+        mode: "no-cors",
+        headers: {
+            "Content-Type": "text/plain"
+        },
+        body: JSON.stringify({
+            barcode: decodedText,
+            mode: mode
+        })
+    })
+    .then(() => console.log("Saved"))
+    .catch(err => console.error(err));
+}
 
   function resetScan() {
       lastCode = null;
       document.getElementById("result").innerText = "—";
   }
 
-  let mode = "giris";
+
 
 function setMode(selected) {
     mode = selected;

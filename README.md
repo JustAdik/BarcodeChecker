@@ -46,4 +46,88 @@ https://barcode-checker-theta.vercel.app/
 - Google Sheets Table
 <img width="1600" height="661" alt="image" src="https://github.com/user-attachments/assets/aff9c699-4f17-439f-8ed2-18300aa46409" />
 
+## Google Sheets Script
 
+function doPost(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+
+  var data = JSON.parse(e.postData.contents);
+
+  var barcode = data.barcode;
+  var mode = data.mode || "giris"; 
+
+  var products = {
+    "1029384756104": { name: "BVB", type: "Hammadde", format: "Rulo (Metre)", amount: 839 },
+    "192837465111": { name: "SMS", type: "Hammadde", format: "Rulo (Metre)", amount: 1300 },
+    "2190384756100": { name: "PC LENS", type: "Hammadde", format: "Rulo (Metre)", amount: 2500 },
+    "6491046194626": { name: "SPUNBOND", type: "Hammadde", format: "Adet", amount: 24000 },
+    "1749562846921": { name: "SBS BAG", type: "Hammadde", format: "Adet", amount: 6275 },
+    "7391640154929": { name: "OFFSET KUTU", type: "Hammadde", format: "Adet", amount: 240 },
+    "6492046104684": { name: "TOGA", type: "Bitmiş ürün", format: "Adet", amount: 320 },
+    "4750275916402": { name: "HOOD", type: "Bitmiş ürün", format: "Adet", amount: 720 }
+  };
+
+  var product = products[barcode];
+
+  var name = "Unknown";
+  var type = "-";
+  var format = "-";
+  var amount = 1;
+
+  if (product) {
+    name = product.name;
+    type = product.type;
+    format = product.format;
+    amount = product.amount || 1;
+  }
+
+  var range = sheet.getDataRange().getValues();
+  var foundRow = -1;
+
+  for (var i = 0; i < range.length; i++) {
+    if (range[i][1] == barcode) {
+      foundRow = i + 1;
+      break;
+    }
+  }
+
+  var date = Utilities.formatDate(
+    new Date(),
+    Session.getScriptTimeZone(),
+    "dd.MM.yyyy"
+  );
+
+  if (foundRow == -1) {
+    var initialQuantity = mode === "cikis" ? -amount : amount;
+
+    sheet.appendRow([
+      date,             // date
+      barcode,          // barcode
+      name,             // product Name
+      type,             // type
+      format,           // format
+      amount,           // initial quantity
+      initialQuantity,  // last quantity
+      1                 // can Count
+    ]);
+  } else {
+    var currentQuantity = Number(sheet.getRange(foundRow, 7).getValue()) || 0;
+    var currentScans = Number(sheet.getRange(foundRow, 8).getValue()) || 0;
+
+    if (mode === "giris") {
+      sheet.getRange(foundRow, 7).setValue(currentQuantity + amount);
+    } else {
+      sheet.getRange(foundRow, 7).setValue(currentQuantity - amount);
+    }
+
+    if (mode === "giris") {
+  sheet.getRange(foundRow, 8).setValue(currentScans + 1);
+} else {
+  sheet.getRange(foundRow, 8).setValue(currentScans - 1);
+}
+  }
+
+  return ContentService
+    .createTextOutput("OK")
+    .setMimeType(ContentService.MimeType.TEXT);
+}
